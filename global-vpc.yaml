@@ -13,9 +13,9 @@ Description: "CloudFormation with VPC"
 Mappings:
   RegionMap:
     us-east-1:
-      AMI: "ami-0ea87431b78a82070"
+      AMI: "ami-0ea87431b78a82070" # Amazon Linux 2023 AMI for us-east-1
     us-west-1:
-      AMI: "ami-05d67c5ff07842777" # Example Amazon Linux 2023 AMI for us-west-1
+      AMI: "ami-02671e999eec7752f" # Amazon Linux 2023 AMI for us-west-1
 
 Resources: 
 #My VPC
@@ -176,7 +176,7 @@ Resources:
     Properties:
       InstanceType: t3.micro
       KeyName: RobBastion
-      ImageId: ami-0ea87431b78a82070
+      ImageId: !FindInMap [RegionMap, !Ref 'AWS::Region', AMI]
       SubnetId: !Ref AppPrivateSubnet1A
       SecurityGroupIds:
         - !Ref AppInstance1ASG
@@ -190,7 +190,7 @@ Resources:
     Properties:
       InstanceType: t3.micro
       KeyName: RobBastion
-      ImageId: ami-0ea87431b78a82070
+      ImageId: !FindInMap [RegionMap, !Ref 'AWS::Region', AMI]
       SubnetId: !Ref AppPrivateSubnet1B
       SecurityGroupIds:
         - !Ref AppInstance1BSG

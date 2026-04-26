@@ -3,10 +3,19 @@
 # Version 1.5
 # Updated By         Date          Notes
 # Rob                4-23-2026     Initial Creation of VPC with 2 AZs, 3 Subnets each, IGW, Route Tables, Bastion Host and App Instances in two different regions. 
+# Rob                4-23-2026     Added Mappings section for AMI IDs in different regions. Updated AppInstance1BSG to allow ICMP access from AppInstance1ASG instead of SSH from BastionSG.
 
 
 AWSTemplateFormatVersion: '2010-09-09'
 Description: "CloudFormation with VPC"
+
+# Add a Mappings section at the top level
+Mappings:
+  RegionMap:
+    us-east-1:
+      AMI: "ami-0ea87431b78a82070"
+    us-west-1:
+      AMI: "ami-05d67c5ff07842777" # Example Amazon Linux 2023 AMI for us-west-1
 
 Resources: 
 #My VPC
@@ -19,6 +28,7 @@ Resources:
       Tags:
         - Key: Name
           Value: MyVPC 
+
 #Public Subnet is AZ 1  
   PublicSubnet1A:
     Type: 'AWS::EC2::Subnet'

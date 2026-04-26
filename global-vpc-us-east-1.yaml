@@ -17,6 +17,21 @@ Mappings:
     us-west-1:
       AMI: "ami-02671e999eec7752f" # Amazon Linux 2023 AMI for us-west-1
 
+# VPC Peering Connection to another VPC in a different region
+Parameters:
+  PeerVpcIdParam:
+    Type: String
+    Description: The VPC ID of the requester VPC in us-east-1
+    Default: "none" # Default to none so the first stack doesn't fail when creating the peering connection
+
+Conditions:
+  # This evaluates to true only when deploying to Northern California
+  IsWestRegion: !Equals [ !Ref "AWS::Region", us-west-1 ]
+  # This prevents the peering resource from failing if no ID is passed
+  HasPeerVpcId: !Not [ !Equals [ !Ref PeerVpcIdParam, "none" ] ]
+  # Combine them: Only create peering if we are in West AND have an ID
+  CreatePeering: !And [ !Condition IsWestRegion, !Condition HasPeerVpcId ]
+
 Resources: 
 #My VPC
   MyVPC: 
@@ -222,10 +237,22 @@ Resources:
           ToPort: -1
           SourceSecurityGroupId: !Ref AppInstance1ASG
 
-# Store the VPC ID in SSM Parameter Store for use in other stacks
+  # Store the ID in SSM (Useful for secondary verification/logging)
   VpcIdParameter:
     Type: 'AWS::SSM::Parameter'
     Properties:
       Name: /network/primary-vpc-id
       Type: String
       Value: !Ref MyVPC
+
+  # The Peering Connection
+  VPCPeeringConnection:
+    Type: 'AWS::EC2::VPCPeeringConnection'
+    Condition: CreatePeering # This ensures it ONLY runs in us-west-1
+    Properties:
+      PeerVpcId: !Ref PeerVpcIdParam
+      VpcId: !Ref MyVPC
+      PeerRegion: us-east-1
+      Tags:
+        - Key: Name
+          Value: MyVPC-Peering-to-East

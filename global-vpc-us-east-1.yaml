@@ -24,6 +24,7 @@ Parameters:
     Description: The VPC ID of the requester VPC in us-east-1
     Default: "none" # Default to none so the first stack doesn't fail when creating the peering connection
 
+# Define Conditions to control resource creation based on region and parameter values
 Conditions:
   # This evaluates to true only when deploying to Northern California
   IsWestRegion: !Equals [ !Ref "AWS::Region", us-west-1 ]
